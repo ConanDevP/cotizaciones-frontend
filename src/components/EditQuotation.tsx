@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useCreateQuotation } from '../hooks/useQuotations';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getQuotation, updateQuotation } from '@/services/api';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -35,8 +36,11 @@ const initialProductState: CreateProductData = {
     commentsLink: ''
 };
 
-export default function QuotationForm() {
+export default function EditQuotation() {
+    const { id } = useParams();
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
+
     const [formData, setFormData] = useState<CreateQuotationData>({
         title: '',
         quote_number: '',
@@ -44,8 +48,33 @@ export default function QuotationForm() {
         products: []
     });
 
-    const createQuotationMutation = useCreateQuotation();
     const [products, setProducts] = useState<CreateProductData[]>([initialProductState]);
+
+    const { data: quotationData, isLoading } = useQuery({
+        queryKey: ['quotation', id],
+        queryFn: () => getQuotation(id as string),
+        enabled: !!id
+    });
+
+    const updateQuotationMutation = useMutation({
+        mutationFn: (data: CreateQuotationData) => updateQuotation(id as string, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['quotations'] });
+            toast.success('Cotización actualizada exitosamente');
+            navigate('/');
+        },
+        onError: () => {
+            toast.error('Error al actualizar la cotización');
+        }
+    });
+
+    useEffect(() => {
+        if (quotationData?.data) {
+            const { title, quote_number, estado, products } = quotationData.data;
+            setFormData({ title, quote_number, estado });
+            setProducts(products);
+        }
+    }, [quotationData]);
 
     const calculateProductTotals = (product: CreateProductData): CreateProductData => {
         const newProduct = { ...product };
@@ -113,43 +142,41 @@ export default function QuotationForm() {
 
         try {
             const quotationData = {
-                data: {
-                    title: formData.title,
-                    quote_number: formData.quote_number,
-                    estado: 'VIGENTE',
-                    products: products.map(product => ({
-                        vendor: product.vendor,
-                        quotationContact: product.quotationContact,
-                        freight: Number(product.freight),
-                        annualQty: Number(product.annualQty),
-                        uom: product.uom,
-                        costEA: Number(product.costEA),
-                        currency: product.currency,
-                        extPrecost: Number(product.extPrecost),
-                        margin: Number(product.margin),
-                        priceEA: Number(product.priceEA),
-                        extPriceSIMA: Number(product.extPriceSIMA),
-                        finalPriceEA: Number(product.finalPriceEA),
-                        extPriceMXN: Number(product.extPriceMXN),
-                        commentsLink: product.commentsLink,
-                        extraMargin: product.extraMargin,
-                        publishedAt: new Date().toISOString()
-                    }))
-                }
+                title: formData.title,
+                quote_number: formData.quote_number,
+                estado: formData.estado,
+                products: products.map(product => ({
+                    vendor: product.vendor,
+                    quotationContact: product.quotationContact,
+                    freight: Number(product.freight),
+                    annualQty: Number(product.annualQty),
+                    uom: product.uom,
+                    costEA: Number(product.costEA),
+                    currency: product.currency,
+                    extPrecost: Number(product.extPrecost),
+                    margin: Number(product.margin),
+                    priceEA: Number(product.priceEA),
+                    extPriceSIMA: Number(product.extPriceSIMA),
+                    finalPriceEA: Number(product.finalPriceEA),
+                    extPriceMXN: Number(product.extPriceMXN),
+                    commentsLink: product.commentsLink,
+                    extraMargin: product.extraMargin
+                }))
             };
 
-            await createQuotationMutation.mutateAsync(quotationData);
-            toast.success('Cotización creada exitosamente');
-            navigate('/');
+            await updateQuotationMutation.mutateAsync(quotationData);
         } catch (error) {
-            console.error('Error al crear la cotización:', error);
-            toast.error('Error al crear la cotización');
+            console.error('Error al actualizar la cotización:', error);
         }
     };
 
+    if (isLoading) {
+        return <div className="flex items-center justify-center h-screen">Cargando...</div>;
+    }
+
     return (
         <div className="max-w-7xl mx-auto p-6">
-            <h1 className="text-3xl font-bold mb-8">Nueva Cotización</h1>
+            <h1 className="text-3xl font-bold mb-8">Editar Cotización</h1>
 
             <form onSubmit={handleSubmit}>
                 <Card className="p-6 space-y-6">
@@ -218,7 +245,6 @@ export default function QuotationForm() {
                                         <Label>Cantidad Anual</Label>
                                         <Input
                                             type="number"
-                                            min="1"
                                             value={product.annualQty}
                                             onChange={(e) => handleProductChange(index, 'annualQty', parseFloat(e.target.value))}
                                             required
@@ -228,8 +254,6 @@ export default function QuotationForm() {
                                         <Label>Flete</Label>
                                         <Input
                                             type="number"
-                                            min="0"
-                                            step="0.01"
                                             value={product.freight}
                                             onChange={(e) => handleProductChange(index, 'freight', parseFloat(e.target.value))}
                                             required
@@ -275,9 +299,6 @@ export default function QuotationForm() {
                                         <Label>Margen (%)</Label>
                                         <Input
                                             type="number"
-                                            min="0"
-                                            max="100"
-                                            step="0.01"
                                             value={product.margin}
                                             onChange={(e) => handleProductChange(index, 'margin', parseFloat(e.target.value))}
                                             required
@@ -366,93 +387,83 @@ export default function QuotationForm() {
                         ))}
                     </div>
 
-                    <div className="flex justify-between items-start w-full">
-                        <div className="mt-6">
-                            <Card className="p-6">
-                                <h2 className="text-xl font-semibold mb-4">Resumen de Ganancias</h2>
-                                <div className="grid md:grid-cols-3 gap-6">
-                                    <div className="space-y-4">
-                                        <div className="space-y-2">
-                                            <Label className="text-sm text-muted-foreground">Margen Total</Label>
-                                            <div className="text-2xl font-bold">
-                                                ${calculateTotals(products).margenTotal.toFixed(2)}
-                                            </div>
-                                            <p className="text-xs text-muted-foreground">
-                                                Suma de (SIMA - Precosto)
-                                            </p>
+                    {/* Resumen de Ganancias */}
+                    <div className="mt-6">
+                        <Card className="p-6">
+                            <h2 className="text-xl font-semibold mb-4">Resumen de Ganancias</h2>
+                            <div className="grid md:grid-cols-3 gap-6">
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label className="text-sm text-muted-foreground">Margen Total</Label>
+                                        <div className="text-2xl font-bold">
+                                            ${calculateTotals(products).margenTotal.toFixed(2)}
                                         </div>
-
-                                        <div className="space-y-2">
-                                            <Label className="text-sm text-muted-foreground">Total Price EA</Label>
-                                            <div className="text-2xl font-bold">
-                                                ${calculateTotals(products).totalPriceEA.toFixed(2)}
-                                            </div>
-                                            <p className="text-xs text-muted-foreground">
-                                                Suma de (MXN - Precosto)
-                                            </p>
-                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            Suma de (SIMA - Precosto)
+                                        </p>
                                     </div>
 
-                                    <div className="space-y-4">
-                                        <div className="space-y-2">
-                                            <Label className="text-sm text-muted-foreground">EXT PRICE SIMA</Label>
-                                            <div className="text-2xl font-bold">
-                                                ${calculateTotals(products).extPriceSIMA.toFixed(2)}
-                                            </div>
-                                            <p className="text-xs text-muted-foreground">
-                                                Suma de (MXN × 0.1)
-                                            </p>
+                                    <div className="space-y-2">
+                                        <Label className="text-sm text-muted-foreground">Total Price EA</Label>
+                                        <div className="text-2xl font-bold">
+                                            ${calculateTotals(products).totalPriceEA.toFixed(2)}
                                         </div>
-
-                                        <div className="space-y-2">
-                                            <Label className="text-sm text-muted-foreground">Extra Margin</Label>
-                                            <div className="text-2xl font-bold">
-                                                {calculateTotals(products).extraMargin.toFixed(2)}%
-                                            </div>
-                                            <p className="text-xs text-muted-foreground">
-                                                Promedio de (Precosto/SIMA)
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        <div className="space-y-2">
-                                            <Label className="text-sm text-muted-foreground">Final Price EA</Label>
-                                            <div className="text-2xl font-bold">
-                                                ${calculateTotals(products).finalPriceEA.toFixed(2)}
-                                            </div>
-                                            <p className="text-xs text-muted-foreground">
-                                                Suma de PriceEA ajustado
-                                            </p>
-                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            Suma de (MXN - Precosto)
+                                        </p>
                                     </div>
                                 </div>
-                            </Card>
 
-                            <div className="flex justify-end space-x-4 mt-6">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => navigate('/')}
-                                >
-                                    Cancelar
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    variant="default"
-                                    disabled={products.some(p => !p.vendor || !p.quotationContact) ||
-                                        createQuotationMutation.isPending}
-                                >
-                                    {createQuotationMutation.isPending ? (
-                                        <>
-                                            <span className="animate-spin mr-2">⌛</span>
-                                            Creando...
-                                        </>
-                                    ) : (
-                                        'Crear Cotización'
-                                    )}
-                                </Button>
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label className="text-sm text-muted-foreground">EXT PRICE SIMA</Label>
+                                        <div className="text-2xl font-bold">
+                                            ${calculateTotals(products).extPriceSIMA.toFixed(2)}
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            Suma de (MXN × 0.1)
+                                        </p>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm text-muted-foreground">Extra Margin</Label>
+                                        <div className="text-2xl font-bold">
+                                            {calculateTotals(products).extraMargin.toFixed(2)}%
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            Promedio de (Precosto/SIMA)
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label className="text-sm text-muted-foreground">Final Price EA</Label>
+                                        <div className="text-2xl font-bold">
+                                            ${calculateTotals(products).finalPriceEA.toFixed(2)}
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            Suma de PriceEA ajustado
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
+                        </Card>
+
+                        <div className="flex justify-end space-x-4 mt-6">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => navigate('/')}
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                type="submit"
+                                disabled={updateQuotationMutation.isPending}
+                            >
+                                {updateQuotationMutation.isPending ? 'Actualizando...' : 'Guardar Cambios'}
+                            </Button>
                         </div>
                     </div>
                 </Card>

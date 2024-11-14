@@ -4,13 +4,13 @@ import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/store/authStore';
 import { toast } from 'sonner';
 
-export default function Navbar() {
+export default function BarraNavegacion() {
   const navigate = useNavigate();
-  const logout = useAuthStore((state) => state.logout);
+  const cerrarSesion = useAuthStore((state) => state.logout);
 
-  const handleLogout = () => {
-    logout();
-    toast.success('Logged out successfully');
+  const manejarCierreSesion = () => {
+    cerrarSesion();
+    toast.success('Sesión cerrada exitosamente');
     navigate('/login');
   };
 
@@ -20,18 +20,18 @@ export default function Navbar() {
         <div className="flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center space-x-2">
             <FileText className="h-6 w-6" />
-            <span className="text-xl font-bold">Quotation System</span>
+            <span className="text-xl font-bold">Sistema de Cotizaciones</span>
           </Link>
           <div className="flex items-center space-x-4">
             <Link to="/new">
               <Button>
                 <PlusCircle className="mr-2 h-4 w-4" />
-                New Quotation
+                Nueva Cotización
               </Button>
             </Link>
-            <Button variant="outline" onClick={handleLogout}>
+            <Button variant="outline" onClick={manejarCierreSesion}>
               <LogOut className="mr-2 h-4 w-4" />
-              Logout
+              Cerrar Sesión
             </Button>
           </div>
         </div>

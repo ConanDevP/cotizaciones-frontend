@@ -8,23 +8,35 @@ import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/store/authStore';
 import { toast } from 'sonner';
 
-export default function LoginForm() {
+export default function FormularioLogin() {
   const navigate = useNavigate();
-  const login = useAuthStore((state) => state.login);
-  const [credentials, setCredentials] = useState({
-    username: '',
-    password: '',
+  const iniciarSesion = useAuthStore((state) => state.login);
+  const [loading, setLoading] = useState(false);
+  const [credenciales, setCredenciales] = useState({
+    usuario: '',
+    contraseña: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const manejarEnvio = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = login(credentials.username, credentials.password);
-    
-    if (success) {
-      toast.success('Login successful');
-      navigate('/');
-    } else {
-      toast.error('Invalid credentials');
+    setLoading(true);
+
+    try {
+      const exito = await iniciarSesion(
+        credenciales.usuario,
+        credenciales.contraseña
+      );
+
+      if (exito) {
+        toast.success('Inicio de sesión exitoso');
+        navigate('/');
+      } else {
+        toast.error('Credenciales inválidas');
+      }
+    } catch (error) {
+      toast.error('Error al iniciar sesión');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -35,51 +47,49 @@ export default function LoginForm() {
           <div className="p-3 rounded-full bg-primary/10 mb-4">
             <Lock className="h-6 w-6 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold">Welcome Back</h1>
-          <p className="text-muted-foreground">Please enter your credentials</p>
+          <h1 className="text-2xl font-bold">Bienvenido de nuevo</h1>
+          <p className="text-muted-foreground">Por favor ingresa tus credenciales</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={manejarEnvio} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor="usuario">Usuario</Label>
             <Input
-              id="username"
+              id="usuario"
               type="text"
-              placeholder="Enter your username"
-              value={credentials.username}
+              placeholder="Ingresa tu usuario"
+              disabled={loading}
+              value={credenciales.usuario}
               onChange={(e) =>
-                setCredentials((prev) => ({
+                setCredenciales((prev) => ({
                   ...prev,
-                  username: e.target.value,
+                  usuario: e.target.value,
                 }))
               }
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="contraseña">Contraseña</Label>
             <Input
-              id="password"
+              id="contraseña"
               type="password"
-              placeholder="Enter your password"
-              value={credentials.password}
+              placeholder="Ingresa tu contraseña"
+              disabled={loading}
+              value={credenciales.contraseña}
               onChange={(e) =>
-                setCredentials((prev) => ({
+                setCredenciales((prev) => ({
                   ...prev,
-                  password: e.target.value,
+                  contraseña: e.target.value,
                 }))
               }
             />
           </div>
 
-          <Button type="submit" className="w-full">
-            Sign In
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
           </Button>
         </form>
-
-        <p className="mt-4 text-sm text-center text-muted-foreground">
-          Use admin/admin to login
-        </p>
       </Card>
     </div>
   );
