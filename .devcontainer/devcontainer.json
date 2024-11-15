@@ -82,17 +82,12 @@
         "files.autoSaveDelay": 1000,
         "files.trimTrailingWhitespace": true,
         "files.insertFinalNewline": true,
-        "oracledevtools.connectionConfiguration.configFilesFolder": "/home/codespace/Oracle/network/admin",
-        "oracledevtools.connectionConfiguration.walletFileFolder": "/home/codespace/Oracle/network/admin",
-        "oracledevtools.bookmarkFileFolder": "/home/codespace/Oracle/oracle.oracledevtools",
-        "oracledevtools.download.otherFolder": "/home/codespace/downloads",
-
         "window.menuBarVisibility": "compact",
         "security.workspace.trust.untrustedFiles": "open"
       }
     }
   },
-  "postCreateCommand": "sh -c 'apt-get update && apt-get install -y zsh git curl && echo \"Installed zsh, git, and curl\" && sh -c \"$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)\" && echo \"Installed oh-my-zsh\" && mkdir -p ~/.local/share/fonts && cd ~/.local/share/fonts && curl -fLO https://github.com/ryanoasis/nerd-fonts/raw/HEAD/patched-fonts/Hermit/Regular/HurmitNerdFont-Regular.otf && echo \"Downloaded Hurmit Nerd Font\" && fc-cache -fv && echo \"Font cache updated\" && if [ ! -d \"${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k\" ]; then git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k; fi && echo \"Cloned powerlevel10k theme\" && echo \"ZSH_THEME=\\\"powerlevel10k/powerlevel10k\\\"\" >> ~/.zshrc && echo \"source ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k/powerlevel10k.zsh-theme\" >> ~/.zshrc && echo \"[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh\" >> ~/.zshrc && echo \"source ~/.zshrc\" >> ~/.zshrc && zsh -c \"source ~/.zshrc && echo 'Powerlevel10k installed and configured successfully'\"'",
+  "postCreateCommand": "bash scripts/devcontainer.sh",
   "remoteUser": "vscode",
   "mounts": [
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
