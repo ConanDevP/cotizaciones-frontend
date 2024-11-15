@@ -28,13 +28,13 @@
         "redhat.java",
         "vscjava.vscode-java-debug",
         "vscjava.vscode-java-test",
-        "ms-vscode.vscode-typescript-tslint-plugin",
+
         "ritwickdey.LiveServer",
         "ms-vsliveshare.vsliveshare",
-        "wayou.vscode-todo-highlight",
+
         "Gruntfuggly.todo-tree",
         "yzhang.markdown-all-in-one",
-        "mtxr.sqltools",
+
         "redhat.vscode-yaml",
         "rangav.vscode-thunder-client"
       ],
