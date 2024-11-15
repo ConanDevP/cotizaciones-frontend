@@ -1,0 +1,101 @@
+{
+  "name": "Ultimate Development Environment",
+  "image": "mcr.microsoft.com/vscode/devcontainers/base:ubuntu-22.04",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11"
+    },
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "17"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/go:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "ms-azuretools.vscode-docker",
+        "ms-python.python",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "eamodio.gitlens",
+        "redhat.java",
+        "vscjava.vscode-java-debug",
+        "vscjava.vscode-java-test",
+        "ms-vscode.vscode-typescript-tslint-plugin",
+        "ritwickdey.LiveServer",
+        "ms-vsliveshare.vsliveshare",
+        "wayou.vscode-todo-highlight",
+        "Gruntfuggly.todo-tree",
+        "yzhang.markdown-all-in-one",
+        "mtxr.sqltools",
+        "redhat.vscode-yaml",
+        "rangav.vscode-thunder-client"
+      ],
+      "settings": {
+        "workbench.iconTheme": "helium-icon-theme",
+        "workbench.colorTheme": "Bearded Theme Coffee",
+        "editor.fontFamily": "Rec Mono Semicasual",
+        "editor.fontLigatures": true,
+        "editor.fontWeight": "normal",
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.minimap.enabled": false,
+        "editor.rulers": [80, 100],
+        "editor.bracketPairColorization.enabled": true,
+        "editor.guides.bracketPairs": true,
+        "editor.suggestSelection": "first",
+        "editor.tabSize": 2,
+        "git.autofetch": true,
+        "git.enableSmartCommit": true,
+        "git.confirmSync": false,
+        "git.ignoreRebaseWarning": true,
+        "terminal.integrated.fontFamily": "Hurmit Nerd Font",
+        "terminal.integrated.fontSize": 13,
+        "terminal.integrated.profiles.linux": {
+          "zsh": {
+            "path": "/usr/bin/zsh"
+          }
+        },
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "github.copilot.enable": {
+          "*": true,
+          "plaintext": true,
+          "markdown": true,
+          "scminput": false
+        },
+        "github.copilot.advanced": {
+          "inlineSuggestCount": 3,
+          "listCount": 10
+        },
+        "javascript.updateImportsOnFileMove.enabled": "always",
+        "typescript.updateImportsOnFileMove.enabled": "always",
+        "python.analysis.typeCheckingMode": "basic",
+        "java.configuration.updateBuildConfiguration": "automatic",
+        "files.autoSave": "afterDelay",
+        "files.autoSaveDelay": 1000,
+        "files.trimTrailingWhitespace": true,
+        "files.insertFinalNewline": true,
+        "oracledevtools.connectionConfiguration.configFilesFolder": "/home/codespace/Oracle/network/admin",
+        "oracledevtools.connectionConfiguration.walletFileFolder": "/home/codespace/Oracle/network/admin",
+        "oracledevtools.bookmarkFileFolder": "/home/codespace/Oracle/oracle.oracledevtools",
+        "oracledevtools.download.otherFolder": "/home/codespace/downloads",
+        "workbench.preferredHighContrastColorTheme": "GitHub Dark Dimmed",
+        "window.menuBarVisibility": "compact",
+        "security.workspace.trust.untrustedFiles": "open"
+      }
+    }
+  },
+  "postCreateCommand": "sh -c 'apt-get update && apt-get install -y zsh git curl && sh -c \"$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)\" && mkdir -p ~/.local/share/fonts && cd ~/.local/share/fonts && curl -fLO https://github.com/ryanoasis/nerd-fonts/raw/HEAD/patched-fonts/Hermit/Regular/HurmitNerdFont-Regular.otf && fc-cache -fv && if [ ! -d \"${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k\" ]; then git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k; fi && echo \"ZSH_THEME=\\\"powerlevel10k/powerlevel10k\\\"\" >> ~/.zshrc && echo \"source ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k/powerlevel10k.zsh-theme\" >> ~/.zshrc && echo \"[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh\" >> ~/.zshrc && echo \"source ~/.zshrc\" >> ~/.zshrc && zsh -c \"source ~/.zshrc && echo 'Powerlevel10k installed and configured successfully'\"'",
+  "remoteUser": "vscode",
+  "mounts": [
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
+  ],
+  "runArgs": ["--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined"]
+}
