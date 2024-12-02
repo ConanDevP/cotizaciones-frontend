@@ -40,7 +40,7 @@ interface AuthStore {
   logout: () => void;
 }
 
-const STRAPI_URL = 'http://localhost:1337/api';
+const STRAPI_URL = 'https://sistema-cotizaciones-production.up.railway.app/api';
 
 export const useAuthStore = create<AuthStore>()(
   persist(

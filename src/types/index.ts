@@ -29,6 +29,7 @@ export interface Product {
     createdAt: string;
     updatedAt: string;
     publishedAt: string;
+    customUom: string;
 }
 
 // Tipo para la respuesta de Strapi
@@ -46,7 +47,10 @@ export interface StrapiResponse<T> {
 
 // Tipo para datos de creación de un producto
 export interface CreateProductData {
+
     vendor: string;
+    name: string;
+    customUom?: string;
     quotationContact: string;
     freight: number;
     annualQty: number;
@@ -68,6 +72,7 @@ export interface CreateProductData {
     extPriceMXN: number;
     commentsLink: string;
     extraMargin: 'SI' | 'NO';
+    field_comments: []
 }
 
 // Tipo para una Cotización
@@ -81,6 +86,7 @@ export interface Quotation {
     createdAt: string;
     updatedAt: string;
     publishedAt: string;
+   
 }
 
 // Tipo para datos de creación de una cotización

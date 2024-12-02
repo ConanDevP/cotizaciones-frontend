@@ -268,14 +268,14 @@ export default function QuotationList() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Fecha</TableHead>
-              <TableHead>Número</TableHead>
-              <TableHead>Título</TableHead>
-              <TableHead>Proveedor</TableHead>
-              <TableHead>Productos</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Quote</TableHead>
+              <TableHead>Client</TableHead>
+              <TableHead>Vendor</TableHead>
+              <TableHead>Products</TableHead>
               <TableHead className="text-right">Total</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead>State</TableHead>
+              <TableHead className="text-right">Options</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
